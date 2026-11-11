@@ -79,6 +79,14 @@ h2{font-family:var(--font-display);font-size:1.1rem;margin:0}
 .blk.dl{color:#fff}
 .blk.done{background:var(--done)!important;color:#fff;opacity:1}
 .blk.late{outline:2px dashed var(--late);outline-offset:1px}
+.stat.hov{cursor:help;transition:border-color .15s,box-shadow .15s}
+.stat.hov:hover,.stat.hov:focus-visible{border-color:var(--fg);box-shadow:0 2px 10px rgba(20,30,50,.12);outline:none}
+.stat .hint{font-size:.68rem;color:var(--muted);margin-top:6px;opacity:.8}
+.tl .tr{transition:opacity .15s}
+.tl.focus .tr:not(.hl){opacity:.22}
+.tl.focus .tr.task.hl .blk:not(.cont){box-shadow:0 0 0 2px var(--fg),0 2px 6px rgba(20,30,50,.2);opacity:1}
+.tl.focus .tr.hl .nm{font-weight:600}
+.target{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--fg);z-index:2;pointer-events:none}
 .legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.8rem;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend .swatch{width:14px;height:14px;border:1px solid var(--line-strong)}
@@ -122,7 +130,7 @@ dialog input[type=password]{width:100%;box-sizing:border-box;font:inherit;paddin
   <header>
     <p class="eyebrow">ME4 Individual Project · Imperial College London · Project plan</p>
     <h1>Can Machine Learning Outperform Classical Methods in Reconstructing a Transitional Boundary Layer from Sparse Sensors?</h1>
-    <p class="sub">POD vs shallow decoder · cylinder wake → JHTDB transitional boundary layer · Oct 2026 – Jun 2027</p>
+    <p class="sub">Iqra Chowdhree · Final Year Project · Oct 2026 – Jun 2027</p>
   </header>
 
   <section class="stats" id="stats" aria-label="Progress summary"></section>
@@ -320,6 +328,7 @@ function renderGantt(){
     if(grp.stretch&&!showStretch) continue;
     const isC=collapsed.has(grp.id);
     const row=el('div','tr grp'+(isC?' collapsed':'')); row.style.setProperty('--gc',`var(${grp.c})`);
+    row.dataset.ids=grp.tasks.map(t=>t.id||'').join(','); row.dataset.tags=grp.tasks.flatMap(t=>t.b.filter(b=>b[3]).map(b=>b[3])).join(',');
     const h=el('div','tr-lbl'); h.tabIndex=0; h.setAttribute('role','button'); h.setAttribute('aria-expanded',String(!isC));
     h.append(el('span','chev','▼'),el('span',null,grp.name));
     const its=grp.tasks.map(t=>byId[t.id]).filter(Boolean);
@@ -334,6 +343,7 @@ function renderGantt(){
     for(const t of grp.tasks){
       const it=byId[t.id];
       const r=el('div','tr task'); r.style.setProperty('--gc',`var(${grp.c})`);
+      if(t.id) r.dataset.id=t.id; r.dataset.tags=t.b.filter(b=>b[3]).map(b=>b[3]).join(',');
       const l=el('div','tr-lbl'+(it&&done[it.id]?' isdone':'')); l.title=t.n;
       if(it){const cb=el('input'); cb.type='checkbox'; cb.checked=!!done[it.id]; cb.disabled=!token; cb.setAttribute('aria-label','Mark '+t.n+' complete'); cb.onchange=()=>toggle(it.id,cb.checked); l.append(cb);}
       const tx=el('div','tx'); tx.append(el('div','nm',t.n),el('div','meta',grp.deadlines?t.b.filter(b=>b[3]).map(b=>b[3]).join(' · ')+' deadlines':rangesText(t))); l.append(tx);
@@ -365,14 +375,38 @@ function renderStats(){
   const sc=schedule(); const wks=Math.abs(sc.sv); const r=x=>x<1?`${Math.round(x*7)} days`:`${x.toFixed(1)} weeks`;
   let label,cls; if(wks<0.5){label='On schedule';cls='ok';} else if(sc.sv<0){label='Behind by '+r(wks);cls='late';} else {label='Ahead by '+r(wks);cls='ahead';}
   const late=counted().filter(i=>itemState(i)==='late');
-  const s=add('Schedule status',label,`Done ${sc.ev} of ${sc.pvNow.toFixed(1)} task-weeks planned by today${late.length?` · ${late.length} overdue: ${late.slice(0,2).map(i=>i.name).join(', ')}${late.length>2?'…':''}`:''}`,'sched '+cls);
+  const s=add('Schedule status',label,late.length?`${late.length} task${late.length>1?'s':''} overdue`:'Nothing overdue','sched '+cls);
   const b=el('div','bar'); const fill=el('i'); fill.style.width=(sc.ev/sc.total*100)+'%'; const mark=el('b'); mark.style.left=(sc.pvNow/sc.total*100)+'%'; mark.title='Where the plan says you should be today'; b.append(fill,mark); s.append(b);
   const n=counted().length, nd=counted().filter(i=>done[i.id]).length;
-  add('Tasks complete',`${nd} / ${n}`,`${Math.round(sc.ev/sc.total*100)}% of planned work · stretch goal not counted`);
+  add('Tasks complete',`${nd} / ${n}`,`${Math.round(nd/n*100)}%`);
   const msWeek={S1:8,S2:17,S3:21,S4:31}; const nextMs=Object.keys(msWeek).find(k=>nowFrac<msWeek[k]+1);
-  add('Next milestone',nextMs||'—',nextMs?`${MS[nextMs]} · ${fmt(wk(msWeek[nextMs]))} (${Math.ceil((wk(msWeek[nextMs])-now)/(7*DAY))} wks)`:'All milestones passed');
+  const mc=add('Next milestone',nextMs||'—',nextMs?`${MS[nextMs]} · ${fmt(wk(msWeek[nextMs]))} (${Math.ceil((wk(msWeek[nextMs])-now)/(7*DAY))} wks)`:'All milestones passed');
+  if(nextMs) hookFocus(mc,msWeek[nextMs],nextMs);
   const nextDl=Object.keys(DL).find(k=>!done[k]&&nowFrac<DL[k][1]+1);
-  add('Next deliverable',nextDl||'—',nextDl?`${DL[nextDl][0]} · ${fmt(wk(DL[nextDl][1]))} (${Math.ceil((wk(DL[nextDl][1])-now)/(7*DAY))} wks)`:'None outstanding');
+  const dc=add('Next deliverable',nextDl||'—',nextDl?`${DL[nextDl][0]} · ${fmt(wk(DL[nextDl][1]))} (${Math.ceil((wk(DL[nextDl][1])-now)/(7*DAY))} wks)`:'None outstanding');
+  if(nextDl) hookFocus(dc,DL[nextDl][1],nextDl);
+}
+// Hovering a milestone/deliverable card highlights every task due on or before it
+function hookFocus(card,week,tag){
+  card.classList.add('hov'); card.tabIndex=0;
+  card.append(el('div','hint','Hover to highlight the tasks due before '+tag));
+  const on=()=>setFocus(week,tag), off=clearFocus;
+  card.addEventListener('mouseenter',on); card.addEventListener('mouseleave',off);
+  card.addEventListener('focus',on); card.addEventListener('blur',off);
+}
+function setFocus(week,tag){
+  const ids=new Set(ITEMS.filter(i=>!i.dl&&i.due<=week&&(!i.stretch||week>=30)).map(i=>i.id));
+  const g=document.getElementById('gantt'); g.classList.add('focus');
+  g.querySelectorAll('.tr').forEach(r=>{
+    const tags=(r.dataset.tags||'').split(','), gids=(r.dataset.ids||'').split(',');
+    r.classList.toggle('hl',(r.dataset.id&&ids.has(r.dataset.id))||tags.includes(tag)||gids.some(x=>ids.has(x)));
+  });
+  let tgt=g.querySelector('.target'); if(!tgt){tgt=el('div','target'); g.querySelector('.tl-body').append(tgt);}
+  tgt.style.left=(cols()[0]+(week+1)*cols()[1])+'px'; tgt.dataset.label=tag;
+}
+function clearFocus(){
+  const g=document.getElementById('gantt'); g.classList.remove('focus');
+  g.querySelectorAll('.tr.hl').forEach(r=>r.classList.remove('hl')); g.querySelector('.target')?.remove();
 }
 
 function renderChecklist(){
