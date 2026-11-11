@@ -3,96 +3,129 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Sensor Placement Project Plan</title>
+<title>Boundary Layer FYP Plan</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
 <style>
-/* Layout: summary strip, then a horizontally scrolling week grid with a sticky task column. */
+/* Layout: title, schedule status + summary, week grid (sticky task column), task checklist, keys. */
 :root{
   --bg:#f7f8fa; --panel:#ffffff; --fg:#1b2230; --muted:#5d6676; --line:#e2e5ec; --line-strong:#c9ced9;
-  --accent:#d1202f;
+  --accent:#d1202f; --done:#1d6f5a; --done-soft:#e3f1ec; --late:#c62828; --late-soft:#fdecec; --ok:#1d6f5a; --warn:#b26a00;
   --holiday:#dcdfe5; --exam:#f7c3c9; --cw:#fbe3d0;
-  --g1:#f2a51a; --g2:#f2a51a; --g3:#f2a51a; --g4:#d89ad6; --g5:#7cc576; --g6:#5bb9e3; --g7:#f2d82a; --g8:#e0262f;
+  --g1:#f2a51a; --g4:#d89ad6; --g5:#7cc576; --g6:#5bb9e3; --g7:#f2d82a; --g8:#e0262f;
   --font-display:"Space Grotesk",system-ui,sans-serif; --font-body:"Inter",system-ui,sans-serif;
-  --cw-w:30px; --label-w:230px;
+  --cw-w:30px; --label-w:250px;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#12151b; --panel:#1a1f27; --fg:#e8ebf1; --muted:#9aa3b2; --line:#2a313c; --line-strong:#3a4250;
-  --accent:#ff5a63; --holiday:#2b3039; --exam:#4a2329; --cw:#3d2e22; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#12151b; --panel:#1a1f27; --fg:#e8ebf1; --muted:#9aa3b2; --line:#2a313c; --line-strong:#3a4250;
-  --accent:#ff5a63; --holiday:#2b3039; --exam:#4a2329; --cw:#3d2e22; color-scheme:dark}
+  --accent:#ff5a63; --done:#3fb58f; --done-soft:#17322a; --late:#ff6b6b; --late-soft:#3a1c1f; --ok:#3fb58f; --warn:#f0a840;
+  --holiday:#2b3039; --exam:#4a2329; --cw:#3d2e22; color-scheme:dark}}
 body{margin:0;font-size:14px;background:var(--bg);color:var(--fg);font-family:var(--font-body)}
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 40px;max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
-h1{font-family:var(--font-display);font-size:1.6rem;margin:0;text-wrap:balance}
-.sub{color:var(--muted);margin:4px 0 0}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+h1{font-family:var(--font-display);font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.2;margin:6px 0 0;text-wrap:balance;max-width:52ch}
+h2{font-family:var(--font-display);font-size:1.1rem;margin:0}
+.sub{color:var(--muted);margin:6px 0 0}
+.stats{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:12px}
+@media (max-width:900px){.stats{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.stats{grid-template-columns:1fr}}
 .stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
 .stat .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .stat .v{font-family:var(--font-display);font-size:1.25rem;margin-top:4px;font-variant-numeric:tabular-nums}
 .stat .d{font-size:.8rem;color:var(--muted);margin-top:2px}
-.bar{height:6px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent)}
+.stat.sched{border-width:2px}
+.stat.sched.ok{border-color:var(--ok)} .stat.sched.ok .v{color:var(--ok)}
+.stat.sched.late{border-color:var(--late)} .stat.sched.late .v{color:var(--late)}
+.stat.sched.ahead{border-color:var(--ok)} .stat.sched.ahead .v{color:var(--ok)}
+.bar{height:6px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden;position:relative}
+.bar i{display:block;height:100%;background:var(--done)}
+.bar b{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--fg)}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.controls button{font:inherit;font-size:.85rem;padding:6px 12px;border-radius:6px;border:1px solid var(--line-strong);background:var(--panel);color:var(--fg);cursor:pointer}
-.controls button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
-.controls button:focus-visible,.grp:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{font:inherit;font-size:.85rem;padding:6px 12px;border-radius:6px;border:1px solid var(--line-strong);background:var(--panel);color:var(--fg);cursor:pointer}
+.btn[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn:focus-visible,.grp:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .scroller{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px}
 .gantt{position:relative;display:grid;grid-template-columns:var(--label-w) repeat(34,var(--cw-w));font-size:.8rem;width:max-content}
 .cell{height:26px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);position:relative}
-.lbl{position:sticky;left:0;z-index:3;background:var(--panel);padding:0 10px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid var(--line-strong)}
+.lbl{position:sticky;left:0;z-index:3;background:var(--panel);padding:0 10px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;border-right:1px solid var(--line-strong)}
+.lbl span{overflow:hidden;text-overflow:ellipsis}
+.lbl.isdone span{color:var(--done);text-decoration:line-through}
+.lbl input{margin:0;accent-color:var(--done);flex:none}
 .hdr{font-size:.68rem;color:var(--muted);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
 .hdr.wk{height:58px;writing-mode:vertical-rl;transform:rotate(180deg);align-items:center;justify-content:flex-start;padding:6px 0;font-variant-numeric:tabular-nums}
 .hdr.mo{font-weight:600;color:var(--fg);font-size:.75rem;justify-content:flex-start;padding-left:4px}
-.grp{font-weight:600;cursor:pointer;user-select:none;gap:6px}
+.grp{font-weight:600;cursor:pointer;user-select:none}
 .grp .chev{display:inline-block;transition:transform .15s;font-size:.7rem;color:var(--muted)}
 .grp.collapsed .chev{transform:rotate(-90deg)}
-.swatch{width:10px;height:10px;border-radius:2px;flex:none}
+.swatch{width:10px;height:10px;border-radius:2px;flex:none;display:inline-block}
 .bg-hol{background:var(--holiday)} .bg-exam{background:var(--exam)} .bg-cw{background:var(--cw)}
 .blk{position:absolute;inset:4px 0;z-index:1;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:600;color:#1b2230;cursor:default}
 .blk.cont{background:repeating-linear-gradient(90deg,#1b2230 0 2px,#fff 2px 5px)!important;outline:1px solid #1b2230}
 .blk.ms{background:#fff!important;outline:1.5px solid #1b2230;inset:5px 3px}
 .blk.dl{color:#fff}
-.blk.past{opacity:.55}
-.blk.now{box-shadow:0 0 0 2px var(--fg)}
+.blk.done{background:var(--done)!important;color:#fff}
+.blk.late{outline:2px dashed var(--late);outline-offset:-1px}
 .today{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);z-index:4;pointer-events:none}
 .today span{position:absolute;bottom:-1px;left:4px;font-size:.68rem;font-weight:600;color:var(--accent);white-space:nowrap;background:var(--panel);padding:1px 4px;border-radius:3px}
 .legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.8rem;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend .swatch{width:14px;height:14px;border:1px solid var(--line-strong)}
+/* Checklist */
+.check{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.check-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.mode{font-size:.8rem;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cl-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.cl-group h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;display:flex;gap:6px;align-items:center}
+.cl-group ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.cl-item{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:6px;border:1px solid var(--line)}
+.cl-item label{display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer}
+.cl-item input{width:16px;height:16px;margin:0;accent-color:var(--done);flex:none}
+.cl-item .nm{min-width:0}
+.cl-item .due{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cl-item.done{background:var(--done-soft);border-color:var(--done)}
+.cl-item.done .nm{color:var(--done);text-decoration:line-through}
+.cl-item.late{background:var(--late-soft);border-color:var(--late)}
+.pill{font-size:.68rem;font-weight:600;padding:1px 7px;border-radius:999px;white-space:nowrap}
+.pill.done{background:var(--done);color:#fff} .pill.late{background:var(--late);color:#fff} .pill.now{border:1px solid var(--fg)} .pill.up{color:var(--muted);border:1px solid var(--line-strong)}
+.readonly .cl-item label{cursor:default}
 .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-.keys h2{font-family:var(--font-display);font-size:1rem;margin:0 0 8px}
-.keys ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:.85rem}
+.keys ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:.85rem}
 .keys li{display:flex;gap:10px;align-items:baseline}
 .keys code{font-family:var(--font-display);font-weight:600;min-width:24px}
 .keys .when{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
-.keys li.done{color:var(--muted);text-decoration:line-through}
-.pill{font-size:.7rem;padding:1px 7px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted);text-decoration:none!important}
+.keys li.past{color:var(--muted)}
+dialog{border:1px solid var(--line-strong);border-radius:10px;background:var(--panel);color:var(--fg);max-width:460px;width:calc(100% - 32px);padding:20px}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog ol{padding-left:18px;line-height:1.5;font-size:.88rem}
+dialog input[type=password]{width:100%;box-sizing:border-box;font:inherit;padding:8px;border:1px solid var(--line-strong);border-radius:6px;background:var(--bg);color:var(--fg)}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 .tip{position:fixed;z-index:20;pointer-events:none;background:var(--fg);color:var(--bg);padding:8px 10px;border-radius:6px;font-size:.8rem;max-width:260px;line-height:1.4;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .tip b{display:block}
-@media (max-width:600px){:root{--label-w:150px;--cw-w:26px}}
+@media (max-width:600px){:root{--label-w:170px;--cw-w:26px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-
 <div class="wrap">
   <header>
-    <h1>Sensor Placement Project Plan</h1>
-    <p class="sub">Flow reconstruction with POD and decoders · Oct 2026 – Jun 2027 · the red line tracks today</p>
+    <p class="eyebrow">ME4 Individual Project · Imperial College London · Project plan</p>
+    <h1>Can Machine Learning Outperform Classical Methods in Reconstructing a Transitional Boundary Layer from Sparse Sensors?</h1>
+    <p class="sub">POD vs shallow decoder · cylinder wake → JHTDB transitional boundary layer · Oct 2026 – Jun 2027</p>
   </header>
 
   <section class="stats" id="stats" aria-label="Progress summary"></section>
 
   <div class="controls" role="toolbar" aria-label="Chart options">
-    <button id="btnToday" type="button">Scroll to today</button>
-    <button id="btnExpand" type="button">Expand all</button>
-    <button id="btnCollapse" type="button">Collapse all</button>
-    <button id="btnStretch" type="button" aria-pressed="true">Show stretch goal</button>
+    <button class="btn" id="btnToday" type="button">Scroll to today</button>
+    <button class="btn" id="btnExpand" type="button">Expand all</button>
+    <button class="btn" id="btnCollapse" type="button">Collapse all</button>
+    <button class="btn" id="btnStretch" type="button" aria-pressed="true">Show stretch goal</button>
   </div>
 
   <div class="scroller" id="scroller"><div class="gantt" id="gantt"></div></div>
 
   <div class="legend">
+    <span><i class="swatch" style="background:var(--done)"></i>Completed task</span>
+    <span><i class="swatch" style="outline:2px dashed var(--late);outline-offset:-2px"></i>Overdue (not ticked)</span>
     <span><i class="swatch bg-hol"></i>Holidays</span>
     <span><i class="swatch bg-exam"></i>Exams</span>
     <span><i class="swatch bg-cw"></i>Coursework</span>
@@ -101,158 +134,268 @@ h1{font-family:var(--font-display);font-size:1.6rem;margin:0;text-wrap:balance}
     <span><i class="swatch" style="background:var(--g8)"></i>Deliverable</span>
   </div>
 
+  <section class="check" id="checklist" aria-labelledby="clTitle">
+    <div class="check-head">
+      <h2 id="clTitle">Task checklist</h2>
+      <div class="mode" id="mode"></div>
+    </div>
+    <div class="cl-groups" id="clGroups"></div>
+  </section>
+
   <div class="keys">
     <div><h2>Milestones</h2><ul id="msList"></ul></div>
     <div><h2>Deliverables</h2><ul id="dlList"></ul></div>
   </div>
 </div>
+
+<dialog id="dlg">
+  <h2>Turn on editing</h2>
+  <p style="font-size:.88rem;color:var(--muted)">Ticks are saved to this site's GitHub repository so everyone with the link sees them. Saving needs a GitHub token that can only write to this one repository.</p>
+  <ol>
+    <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → new fine-grained token</a>.</li>
+    <li>Repository access: <b>Only select repositories → project-plan</b>.</li>
+    <li>Permissions → Repository → <b>Contents: Read and write</b>. Generate, then copy it.</li>
+    <li>Paste it below. It stays in this browser only.</li>
+  </ol>
+  <label for="tok" style="font-size:.8rem;font-weight:600">GitHub token</label>
+  <input id="tok" type="password" autocomplete="off" placeholder="github_pat_…">
+  <p id="dlgMsg" style="font-size:.8rem;color:var(--late);min-height:1em;margin:6px 0 0"></p>
+  <div class="row"><button class="btn" id="dlgCancel" type="button">Cancel</button><button class="btn" id="dlgSave" type="button" aria-pressed="true">Save token</button></div>
+</dialog>
 <div class="tip" id="tip" hidden></div>
 
 <script>
-const START = new Date(2026,9,19); // Mon 19 Oct 2026
-const N = 34, DAY = 864e5;
-const wk = i => new Date(2026,9,19+7*i);
-const fmt = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
+const OWNER='iqrachowdhree', REPO='project-plan', FILE='progress.json';
+const DAY=864e5, N=34;
+const wk=i=>new Date(2026,9,19+7*i);
+const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
+const BANDS={cw:[8,19,20],hol:[9,10,11,23,24,25,26],exam:[27,28,29]};
 
-// Background bands (week indices)
-const BANDS = {cw:[8,19,20], hol:[9,10,11,23,24,25,26], exam:[27,28,29]};
-
-// [start,end] week indices inclusive. type: w=work, c=contingency, m=milestone, d=deliverable
-const GROUPS = [
- {id:1,name:'Literature review',c:'--g1',tasks:[
-   {n:'General reading',b:[[0,5],[12,15]]}]},
- {id:2,name:'Training and skills development',c:'--g2',tasks:[
-   {n:'Python, numpy, pytorch',b:[[3,5]]},
-   {n:'Git, repositories',b:[[4,5]]},
-   {n:'Machine learning',b:[[4,6]]}]},
- {id:3,name:'Software setup',c:'--g3',tasks:[
-   {n:'Teams data management',b:[[3,3]]},
-   {n:'Python environment and Git repository',b:[[3,4]]},
-   {n:'Imperial HPC cluster',b:[[12,12]]}]},
+// Bars: [startWeek,endWeek,type,tag]; type w=work (default), c=contingency, m=milestone, d=deadline work
+const GROUPS=[
+ {id:1,name:'Literature review',c:'--g1',tasks:[{n:'General reading',b:[[0,5],[12,15]]}]},
+ {id:2,name:'Training and skills development',c:'--g1',tasks:[
+   {n:'Python, numpy, pytorch',b:[[3,5]]},{n:'Git, repositories',b:[[4,5]]},{n:'Machine learning',b:[[4,6]]}]},
+ {id:3,name:'Software setup',c:'--g1',tasks:[
+   {n:'Teams data management',b:[[3,3]]},{n:'Python environment and Git repository',b:[[3,4]]},{n:'Imperial HPC cluster',b:[[12,12]]}]},
  {id:4,name:'Cylinder wake',c:'--g4',tasks:[
-   {n:'Reproduce published POD results',b:[[4,7]]},
-   {n:'Reconstruction error framework',b:[[6,7]]},
+   {n:'Reproduce published POD results',b:[[4,7]]},{n:'Reconstruction error framework',b:[[6,7]]},
    {n:'Reproduce published decoder results',b:[[7,7],[8,8,'m','S1'],[9,9,'c']]}]},
  {id:5,name:'Reduced JHTDB',c:'--g5',tasks:[
-   {n:'Survey database, size a reduced subset',b:[[12,12],[13,13,'c']]},
-   {n:'Apply POD',b:[[13,14]]},
-   {n:'Apply decoder',b:[[15,16],[17,17,'c']]},
-   {n:'Errors and comparisons',b:[[16,16],[17,17,'m','S2'],[18,18,'c']]}]},
+   {n:'Survey database, size a reduced subset',b:[[12,12],[13,13,'c']]},{n:'Apply POD',b:[[13,14]]},
+   {n:'Apply decoder',b:[[15,16],[17,17,'c']]},{n:'Errors and comparisons',b:[[16,16],[17,17,'m','S2'],[18,18,'c']]}]},
  {id:6,name:'Unconstrained sensor placement',c:'--g6',tasks:[
-   {n:'Apply to POD',b:[[17,18]]},
-   {n:'Apply to decoder',b:[[20,21]]},
-   {n:'Errors and comparisons',b:[[21,21,'m','S3'],[22,22,'c']]}]},
+   {n:'Apply to POD',b:[[17,18]]},{n:'Apply to decoder',b:[[20,21]]},{n:'Errors and comparisons',b:[[21,21,'m','S3'],[22,22,'c']]}]},
  {id:7,name:'Constrained sensor placement (stretch)',c:'--g7',stretch:true,tasks:[
-   {n:'Restrict sensors to wall',b:[[30,31]]},
-   {n:'Errors and comparisons',b:[[31,31,'m','S4'],[32,32,'c']]}]},
- {id:8,name:'Deadlines',c:'--g8',tasks:[
+   {n:'Restrict sensors to wall',b:[[30,31]]},{n:'Errors and comparisons',b:[[31,31,'m','S4'],[32,32,'c']]}]},
+ {id:8,name:'Deadlines',c:'--g8',deadlines:true,tasks:[
    {n:'Report writing',b:[[1,1,'d','D1'],[2,2,'d','D2'],[12,15,'d'],[21,22,'d'],[30,31,'d'],[32,32,'d','D5']]},
    {n:'Presentation, seminar, poster',b:[[14,14,'d','D3'],[30,30,'d'],[31,31,'d','D4'],[32,32,'d','D6']]}]},
 ];
-const MS = {S1:'Methods verified against published results',S2:'Objectives 1 and 2 complete',S3:'Objective 3 complete',S4:'Objective 4 complete'};
-const DL = {D1:'Project definition',D2:'Project plan',D3:'Progress presentation',D4:'Exhibition poster',D5:'Project report',D6:'Seminar'};
+const MS={S1:'Methods verified against published results',S2:'Objectives 1 and 2 complete',S3:'Objective 3 complete',S4:'Objective 4 complete'};
+const DL={D1:['Project definition',1],D2:['Project plan',2],D3:['Progress presentation',14],D4:['Exhibition poster',31],D5:['Project report',32],D6:['Seminar',32]};
 
-let collapsed = new Set(), showStretch = true;
-try{ const s=JSON.parse(localStorage.getItem('gantt-ui')||'{}'); collapsed=new Set(s.c||[]); if(s.s===false) showStretch=false; }catch(e){}
-const save=()=>{try{localStorage.setItem('gantt-ui',JSON.stringify({c:[...collapsed],s:showStretch}))}catch(e){}};
+// Checklist items. Work weeks = planned effort; a task with no work bar (e.g. milestone-only) uses its milestone week.
+const ITEMS=[];
+GROUPS.forEach(g=>{ if(g.deadlines) return; g.tasks.forEach((t,i)=>{
+  t.id=`g${g.id}t${i}`;
+  let weeks=[]; t.b.forEach(b=>{ if((b[2]||'w')==='w') for(let k=b[0];k<=b[1];k++) weeks.push(k); });
+  if(!weeks.length){ const m=t.b.find(b=>b[2]==='m'); weeks=[m[0]]; }
+  ITEMS.push({id:t.id,name:t.n,group:g,weeks,due:Math.max(...weeks),stretch:!!g.stretch});
+});});
+const dlGroup={id:8,name:'Deliverables',c:'--g8'};
+Object.entries(DL).forEach(([k,[n,w]])=>ITEMS.push({id:k,name:`${k} · ${n}`,group:dlGroup,weeks:[w],due:w,stretch:false,dl:true}));
+const byId=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 
-const now = new Date();
-const nowFrac = (now - START)/(7*DAY); // fractional week index
-const status = (s,e) => nowFrac >= e+1 ? 'past' : nowFrac >= s ? 'now' : 'future';
+// ---- State ----
+let done={}; let sha=null; let token=null; let saveTimer=null; let saveState='';
+let collapsed=new Set(), showStretch=true;
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+try{const s=JSON.parse(ls.get('gantt-ui')||'{}'); collapsed=new Set(s.c||[]); if(s.s===false) showStretch=false;}catch(e){}
+token=ls.get('gh-token');
+try{done=JSON.parse(ls.get('progress-cache')||'{}').done||{};}catch(e){}
+const saveUi=()=>ls.set('gantt-ui',JSON.stringify({c:[...collapsed],s:showStretch}));
 
-function el(tag,cls,txt){const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e;}
-const bandClass = i => BANDS.hol.includes(i)?'bg-hol':BANDS.exam.includes(i)?'bg-exam':BANDS.cw.includes(i)?'bg-cw':'';
+const now=new Date(); const nowFrac=(now-wk(0))/(7*DAY);
+const status=(s,e)=>nowFrac>=e+1?'past':nowFrac>=s?'now':'future';
+function itemState(it){ if(done[it.id]) return 'done'; if(nowFrac>=it.due+1) return 'late'; if(nowFrac>=Math.min(...it.weeks)) return 'now'; return 'up'; }
 
-function render(){
-  const g = document.getElementById('gantt'); g.innerHTML='';
-  // Month row
+async function loadProgress(){
+  const api=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}?ref=main&t=${Date.now()}`;
+  try{
+    const h={Accept:'application/vnd.github+json'}; if(token) h.Authorization='Bearer '+token;
+    const r=await fetch(api,{headers:h,cache:'no-store'}); if(!r.ok) throw new Error(r.status);
+    const j=await r.json(); sha=j.sha;
+    const txt=decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))));
+    done=JSON.parse(txt).done||{};
+  }catch(e){
+    try{const r=await fetch(`${FILE}?t=${Date.now()}`,{cache:'no-store'}); if(r.ok) done=(await r.json()).done||{};}catch(e2){}
+  }
+  ls.set('progress-cache',JSON.stringify({done}));
+  renderAll();
+}
+async function saveProgress(){
+  if(!token) return;
+  saveState='Saving…'; renderMode();
+  const body={done}; const content=btoa(unescape(encodeURIComponent(JSON.stringify(body,null,2)+'\n')));
+  const url=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+  const h={Accept:'application/vnd.github+json',Authorization:'Bearer '+token,'Content-Type':'application/json'};
+  try{
+    if(!sha){const g=await fetch(url+'?ref=main',{headers:h,cache:'no-store'}); if(g.ok) sha=(await g.json()).sha;}
+    let r=await fetch(url,{method:'PUT',headers:h,body:JSON.stringify({message:'Update task progress',content,sha,branch:'main'})});
+    if(r.status===409||r.status===422){const g=await fetch(url+'?ref=main',{headers:h,cache:'no-store'}); if(g.ok) sha=(await g.json()).sha;
+      r=await fetch(url,{method:'PUT',headers:h,body:JSON.stringify({message:'Update task progress',content,sha,branch:'main'})});}
+    if(!r.ok) throw new Error(r.status===401||r.status===403?'GitHub rejected the token. Check it has Contents: Read and write on project-plan.':'GitHub returned '+r.status);
+    sha=(await r.json()).content.sha; saveState='Saved · visible to everyone with the link';
+  }catch(e){ saveState='Not saved: '+e.message; }
+  ls.set('progress-cache',JSON.stringify({done})); renderMode();
+}
+function toggle(id,on){
+  if(!token) return;
+  if(on) done[id]=new Date().toISOString().slice(0,10); else delete done[id];
+  renderAll(); clearTimeout(saveTimer); saveTimer=setTimeout(saveProgress,800);
+}
+
+// ---- Schedule metric (earned schedule, in weeks) ----
+const counted=()=>ITEMS.filter(i=>!i.stretch);
+function planned(t){ let v=0; for(const it of counted()) for(const k of it.weeks) v+=Math.max(0,Math.min(1,t-k)); return v; }
+function earned(){ let v=0; for(const it of counted()) if(done[it.id]) v+=it.weeks.length; return v; }
+function schedule(){
+  const ev=earned(), pvNow=planned(nowFrac), total=planned(N);
+  let lo=0, hi=N; if(ev>=total) lo=hi=N; else for(let i=0;i<40;i++){const m=(lo+hi)/2; planned(m)<ev?lo=m:hi=m;}
+  const es=ev<=0?0:(lo+hi)/2;
+  return {ev,pvNow,total,sv:es-Math.max(0,nowFrac)};
+}
+
+// ---- Rendering ----
+const el=(tag,cls,txt)=>{const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e;};
+const bandClass=i=>BANDS.hol.includes(i)?'bg-hol':BANDS.exam.includes(i)?'bg-exam':BANDS.cw.includes(i)?'bg-cw':'';
+const cols=()=>getComputedStyle(document.getElementById('gantt')).gridTemplateColumns.split(' ').map(parseFloat);
+
+function renderGantt(){
+  const g=document.getElementById('gantt'); g.innerHTML='';
   g.appendChild(el('div','cell lbl hdr','Month'));
-  let i=0; while(i<N){ const m=wk(i).getMonth(); let j=i; while(j+1<N && wk(j+1).getMonth()===m) j++;
-    const c=el('div','cell hdr mo',wk(i).toLocaleDateString('en-GB',{month:'short'})); c.style.gridColumn=`span ${j-i+1}`; g.appendChild(c); i=j+1; }
-  // Week row
-  const wl=el('div','cell lbl hdr','Week commencing'); wl.style.height='58px'; wl.style.alignItems='flex-end'; wl.style.justifyContent='flex-start'; g.appendChild(wl);
+  let i=0; while(i<N){const m=wk(i).getMonth(); let j=i; while(j+1<N&&wk(j+1).getMonth()===m) j++;
+    const c=el('div','cell hdr mo',wk(i).toLocaleDateString('en-GB',{month:'short'})); c.style.gridColumn=`span ${j-i+1}`; g.appendChild(c); i=j+1;}
+  const wl=el('div','cell lbl hdr','Week commencing'); wl.style.height='58px'; wl.style.alignItems='flex-end'; g.appendChild(wl);
   for(let k=0;k<N;k++) g.appendChild(el('div','cell hdr wk '+bandClass(k),wk(k).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})));
-
   for(const grp of GROUPS){
-    if(grp.stretch && !showStretch) continue;
-    const isC = collapsed.has(grp.id);
+    if(grp.stretch&&!showStretch) continue;
+    const isC=collapsed.has(grp.id);
     const h=el('div','cell lbl grp'+(isC?' collapsed':'')); h.tabIndex=0; h.setAttribute('role','button'); h.setAttribute('aria-expanded',String(!isC));
-    h.append(el('span','chev','▼')); const sw=el('i','swatch'); sw.style.background=`var(${grp.c})`; h.append(sw, el('span',null,`${grp.id} · ${grp.name}`));
-    const toggle=()=>{isC?collapsed.delete(grp.id):collapsed.add(grp.id); save(); render();};
-    h.onclick=toggle; h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};
+    const sw=el('i','swatch'); sw.style.background=`var(${grp.c})`; h.append(el('span','chev','▼'),sw,el('span',null,`${grp.id} · ${grp.name}`));
+    const tg=()=>{isC?collapsed.delete(grp.id):collapsed.add(grp.id); saveUi(); renderGantt();};
+    h.onclick=tg; h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tg();}};
     g.appendChild(h);
-    // Group summary row cells: show combined span when collapsed
-    const all = grp.tasks.flatMap(t=>t.b.map(b=>[...b,t.n]));
-    for(let k=0;k<N;k++){ const c=el('div','cell '+bandClass(k)); if(isC){ for(const b of all) if(k>=b[0]&&k<=b[1]) addBlock(c,grp,b,b[4],k); } g.appendChild(c); }
+    for(let k=0;k<N;k++){const c=el('div','cell '+bandClass(k)); if(isC) for(const t of grp.tasks) for(const b of t.b) if(k>=b[0]&&k<=b[1]) addBlock(c,grp,t,b,k); g.appendChild(c);}
     if(isC) continue;
     for(const t of grp.tasks){
-      const l=el('div','cell lbl',t.n); l.style.paddingLeft='28px'; l.title=t.n; g.appendChild(l);
-      for(let k=0;k<N;k++){ const c=el('div','cell '+bandClass(k)); for(const b of t.b) if(k>=b[0]&&k<=b[1]) addBlock(c,grp,b,t.n,k); g.appendChild(c); }
+      const it=byId[t.id];
+      const l=el('div','cell lbl'+(it&&done[it.id]?' isdone':'')); l.style.paddingLeft=it?'14px':'28px'; l.title=t.n;
+      if(it){const cb=el('input'); cb.type='checkbox'; cb.checked=!!done[it.id]; cb.disabled=!token; cb.setAttribute('aria-label','Mark '+t.n+' complete'); cb.onchange=()=>toggle(it.id,cb.checked); l.append(cb);}
+      l.append(el('span',null,t.n)); g.appendChild(l);
+      for(let k=0;k<N;k++){const c=el('div','cell '+bandClass(k)); for(const b of t.b) if(k>=b[0]&&k<=b[1]) addBlock(c,grp,t,b,k); g.appendChild(c);}
     }
   }
-  // Today line
-  if(nowFrac>=0 && nowFrac<=N){
-    const line=el('div','today'); const cw=parseFloat(getComputedStyle(g).gridTemplateColumns.split(' ')[1]);
-    const lw=parseFloat(getComputedStyle(g).gridTemplateColumns.split(' ')[0]);
-    line.style.left=(lw+nowFrac*cw)+'px'; line.append(el('span',null,'Today · '+fmt(now))); g.appendChild(line);
-  }
+  if(nowFrac>=0&&nowFrac<=N){const [lw,cw]=cols(); const line=el('div','today'); line.style.left=(lw+nowFrac*cw)+'px'; line.append(el('span',null,'Today · '+fmt(now))); g.appendChild(line);}
 }
-
-function addBlock(cell,grp,b,name,k){
-  const [s,e,type='w',tag]=b;
+function addBlock(cell,grp,t,b,k){
+  const [s,e,type='w',tag]=b; const it=byId[t.id];
+  let dlDone=false; if(type==='d'&&tag) dlDone=!!done[tag];
   const d=el('div','blk'+(type==='c'?' cont':type==='m'?' ms':type==='d'?' dl':''));
   if(type!=='c'&&type!=='m') d.style.background=`var(${type==='d'?'--g8':grp.c})`;
-  const st=status(s,e); if(st==='past') d.classList.add('past'); if(st==='now') d.classList.add('now');
-  if(tag && k===s) d.textContent=tag;
+  const isDone=(it&&done[it.id]&&type!=='c')||dlDone;
+  if(isDone) d.classList.add('done');
+  else if((it&&type==='w'&&itemState(it)==='late')||(type==='d'&&tag&&nowFrac>=DL[tag][1]+1)) d.classList.add('late');
+  if(tag&&k===s) d.textContent=tag; else if(isDone&&k===s&&type==='w') d.textContent='✓';
   if(k===s) d.style.left='2px'; if(k===e) d.style.right='2px';
-  d.dataset.tip=JSON.stringify({name,grp:grp.name,type,tag,s,e,st});
+  d.dataset.tip=JSON.stringify({name:t.n,type,tag,s,e,done:!!isDone});
   cell.appendChild(d);
 }
+
+function renderStats(){
+  const S=document.getElementById('stats'); S.innerHTML='';
+  const add=(k,v,d,cls)=>{const s=el('div','stat'+(cls?' '+cls:'')); s.append(el('div','k',k),el('div','v',v)); if(d) s.append(el('div','d',d)); S.append(s); return s;};
+  const sc=schedule(); const wks=Math.abs(sc.sv); const r=x=>x<1?`${Math.round(x*7)} days`:`${x.toFixed(1)} weeks`;
+  let label,cls; if(wks<0.5){label='On schedule';cls='ok';} else if(sc.sv<0){label='Behind by '+r(wks);cls='late';} else {label='Ahead by '+r(wks);cls='ahead';}
+  const late=counted().filter(i=>itemState(i)==='late');
+  const s=add('Schedule status',label,`Done ${sc.ev} of ${sc.pvNow.toFixed(1)} task-weeks planned by today${late.length?` · ${late.length} overdue: ${late.slice(0,2).map(i=>i.name).join(', ')}${late.length>2?'…':''}`:''}`,'sched '+cls);
+  const b=el('div','bar'); const fill=el('i'); fill.style.width=(sc.ev/sc.total*100)+'%'; const mark=el('b'); mark.style.left=(sc.pvNow/sc.total*100)+'%'; mark.title='Where the plan says you should be today'; b.append(fill,mark); s.append(b);
+  const n=counted().length, nd=counted().filter(i=>done[i.id]).length;
+  add('Tasks complete',`${nd} / ${n}`,`${Math.round(sc.ev/sc.total*100)}% of planned work · stretch goal not counted`);
+  const msWeek={S1:8,S2:17,S3:21,S4:31}; const nextMs=Object.keys(msWeek).find(k=>nowFrac<msWeek[k]+1);
+  add('Next milestone',nextMs||'—',nextMs?`${MS[nextMs]} · ${fmt(wk(msWeek[nextMs]))} (${Math.ceil((wk(msWeek[nextMs])-now)/(7*DAY))} wks)`:'All milestones passed');
+  const nextDl=Object.keys(DL).find(k=>!done[k]&&nowFrac<DL[k][1]+1);
+  add('Next deliverable',nextDl||'—',nextDl?`${DL[nextDl][0]} · ${fmt(wk(DL[nextDl][1]))} (${Math.ceil((wk(DL[nextDl][1])-now)/(7*DAY))} wks)`:'None outstanding');
+}
+
+function renderChecklist(){
+  const root=document.getElementById('clGroups'); root.innerHTML='';
+  document.getElementById('checklist').classList.toggle('readonly',!token);
+  const groups=[...GROUPS.filter(g=>!g.deadlines),dlGroup];
+  for(const g of groups){
+    const items=ITEMS.filter(i=>i.group.id===g.id); if(!items.length) continue;
+    const box=el('div','cl-group'); const h=el('h3'); const sw=el('i','swatch'); sw.style.background=`var(${g.c})`;
+    const nd=items.filter(i=>done[i.id]).length; h.append(sw,el('span',null,`${g.name} · ${nd}/${items.length}`)); box.append(h);
+    const ul=el('ul');
+    for(const it of items){
+      const st=itemState(it); const li=el('li','cl-item'+(st==='done'?' done':st==='late'?' late':''));
+      const lab=el('label'); const cb=el('input'); cb.type='checkbox'; cb.id='cb-'+it.id; cb.checked=!!done[it.id]; cb.disabled=!token; cb.onchange=()=>toggle(it.id,cb.checked);
+      lab.append(cb,el('span','nm',it.name)); li.append(lab);
+      const dueTxt=fmt(new Date(2026,9,19+7*it.due+6));
+      const pill=st==='done'?el('span','pill done','Done ✓'):st==='late'?el('span','pill late','Overdue'):st==='now'?el('span','pill now','In progress'):el('span','pill up','Upcoming');
+      li.append(el('span','due',st==='done'?'Ticked '+fmt(new Date(done[it.id])):'Due '+dueTxt),pill); ul.append(li);
+    }
+    box.append(ul); root.append(box);
+  }
+  renderMode();
+}
+function renderMode(){
+  const m=document.getElementById('mode'); m.innerHTML='';
+  if(token){ m.append(el('span',null,saveState||'Editing on · ticks save to GitHub')); const b=el('button','btn','Stop editing'); b.type='button'; b.onclick=()=>{ls.del('gh-token');token=null;saveState='';renderAll();}; m.append(b); }
+  else { m.append(el('span',null,'View only')); const b=el('button','btn','Edit progress'); b.type='button'; b.onclick=()=>document.getElementById('dlg').showModal(); m.append(b); }
+}
+function renderKeys(){
+  const msWeek={S1:8,S2:17,S3:21,S4:31};
+  const fill=(id,list)=>{const u=document.getElementById(id); u.innerHTML=''; for(const [tag,txt,w,isDone] of list){const li=el('li',(isDone||nowFrac>=w+1)?'past':''); li.append(el('code',null,tag),el('span',null,txt+(isDone?' ✓':'')),el('span','when',fmt(wk(w)))); u.append(li);}};
+  fill('msList',Object.entries(MS).map(([k,v])=>[k,v,msWeek[k],false]));
+  fill('dlList',Object.entries(DL).map(([k,[n,w]])=>[k,n,w,!!done[k]]));
+}
+function renderAll(){renderStats();renderGantt();renderChecklist();renderKeys();}
 
 // Tooltip
 const tip=document.getElementById('tip');
 document.addEventListener('pointermove',ev=>{
   const b=ev.target.closest?.('.blk'); if(!b){tip.hidden=true;return;}
-  const d=JSON.parse(b.dataset.tip);
-  const kind={w:'Work',c:'Contingency',m:'Milestone',d:'Deadline work'}[d.type];
-  const end=new Date(2026,9,19+7*d.e+6);
-  const stx={past:'Complete',now:'In progress',future:'Upcoming'}[d.st];
-  const extra=d.tag?(MS[d.tag]||DL[d.tag]):'';
-  tip.innerHTML=''; tip.append(el('b',null,d.name));
-  tip.append(el('div',null,`${kind}${d.tag?' · '+d.tag:''}${extra?' – '+extra:''}`));
-  tip.append(el('div',null,`${fmt(wk(d.s))} → ${fmt(end)} · ${stx}`));
-  tip.hidden=false;
-  const x=Math.min(ev.clientX+14, innerWidth-tip.offsetWidth-8), y=Math.min(ev.clientY+14, innerHeight-tip.offsetHeight-8);
-  tip.style.left=x+'px'; tip.style.top=y+'px';
+  const d=JSON.parse(b.dataset.tip); const kind={w:'Work',c:'Contingency',m:'Milestone',d:'Deadline work'}[d.type];
+  const extra=d.tag?(MS[d.tag]||(DL[d.tag]&&DL[d.tag][0])):'';
+  tip.innerHTML=''; tip.append(el('b',null,d.name),el('div',null,`${kind}${d.tag?' · '+d.tag:''}${extra?' – '+extra:''}`),el('div',null,`${fmt(wk(d.s))} → ${fmt(new Date(2026,9,19+7*d.e+6))}${d.done?' · Completed':''}`));
+  tip.hidden=false; tip.style.left=Math.min(ev.clientX+14,innerWidth-tip.offsetWidth-8)+'px'; tip.style.top=Math.min(ev.clientY+14,innerHeight-tip.offsetHeight-8)+'px';
 });
 
-// Summary + key lists
-function weeksUntil(i){return Math.ceil((wk(i)-now)/(7*DAY));}
-function summary(){
-  const pct=Math.max(0,Math.min(100,nowFrac/33*100));
-  const findTag=(prefix)=>{const out=[];for(const g of GROUPS)for(const t of g.tasks)for(const b of t.b)if(b[3]&&b[3].startsWith(prefix))out.push({tag:b[3],i:b[0]});return out.sort((a,b)=>a.i-b.i);};
-  const ms=findTag('S'), dl=findTag('D');
-  const nextMs=ms.find(m=>nowFrac<m.i+1), nextDl=dl.find(m=>nowFrac<m.i+1);
-  const active=[]; for(const g of GROUPS)for(const t of g.tasks)if(g.id!==8&&t.b.some(b=>(b[2]||'w')==='w'&&status(b[0],b[1])==='now'))active.push(t.n);
-  const S=document.getElementById('stats'); S.innerHTML='';
-  const add=(k,v,d,p)=>{const s=el('div','stat');s.append(el('div','k',k),el('div','v',v));if(d)s.append(el('div','d',d));if(p!=null){const b=el('div','bar');const i=el('i');i.style.width=p+'%';b.append(i);s.append(b);}S.append(s);};
-  add('Timeline elapsed',Math.round(pct)+'%',`Week ${Math.max(1,Math.floor(nowFrac)+1)} of 34`,pct);
-  add('Next milestone',nextMs?nextMs.tag:'—',nextMs?`${MS[nextMs.tag]} · ${fmt(wk(nextMs.i))} (${weeksUntil(nextMs.i)} wks)`:'All milestones passed');
-  add('Next deliverable',nextDl?nextDl.tag:'—',nextDl?`${DL[nextDl.tag]} · ${fmt(wk(nextDl.i))} (${weeksUntil(nextDl.i)} wks)`:'All deliverables passed');
-  add('Active this week',String(active.length),active.slice(0,3).join(', ')||'Nothing scheduled');
-  const fill=(id,list,map)=>{const u=document.getElementById(id);u.innerHTML='';for(const m of list){const li=el('li',nowFrac>=m.i+1?'done':'');li.append(el('code',null,m.tag),el('span',null,map[m.tag]));const w=el('span','when',fmt(wk(m.i)));li.append(w);if(m===nextMs||m===nextDl)li.append(el('span','pill','next'));u.append(li);}};
-  fill('msList',ms,MS); fill('dlList',dl,DL);
-}
+// Token dialog
+const dlg=document.getElementById('dlg');
+document.getElementById('dlgCancel').onclick=()=>dlg.close();
+document.getElementById('dlgSave').onclick=async()=>{
+  const v=document.getElementById('tok').value.trim(); const msg=document.getElementById('dlgMsg');
+  if(!v){msg.textContent='Paste a token first.';return;}
+  msg.textContent='Checking…';
+  try{const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`,{headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+v}});
+    const j=r.ok?await r.json():null;
+    if(!j||!j.permissions||!j.permissions.push){msg.textContent='That token cannot write to project-plan. Check repository access and Contents: Read and write.';return;}
+  }catch(e){msg.textContent='Could not reach GitHub. Try again.';return;}
+  token=v; ls.set('gh-token',v); document.getElementById('tok').value=''; msg.textContent=''; dlg.close(); saveState=''; await loadProgress();
+};
 
-function scrollToday(){const sc=document.getElementById('scroller');const cw=parseFloat(getComputedStyle(document.getElementById('gantt')).gridTemplateColumns.split(' ')[1]);sc.scrollTo({left:Math.max(0,(nowFrac-3)*cw),behavior:'smooth'});}
+function scrollToday(){const [,cw]=cols(); document.getElementById('scroller').scrollTo({left:Math.max(0,(nowFrac-3)*cw),behavior:'smooth'});}
 document.getElementById('btnToday').onclick=scrollToday;
-document.getElementById('btnExpand').onclick=()=>{collapsed.clear();save();render();};
-document.getElementById('btnCollapse').onclick=()=>{GROUPS.forEach(g=>collapsed.add(g.id));save();render();};
+document.getElementById('btnExpand').onclick=()=>{collapsed.clear();saveUi();renderGantt();};
+document.getElementById('btnCollapse').onclick=()=>{GROUPS.forEach(g=>collapsed.add(g.id));saveUi();renderGantt();};
 const bs=document.getElementById('btnStretch'); bs.setAttribute('aria-pressed',String(showStretch));
-bs.onclick=()=>{showStretch=!showStretch;bs.setAttribute('aria-pressed',String(showStretch));save();render();};
-addEventListener('resize',render);
-render(); summary();
-setInterval(()=>{location.reload();},6*3600e3); // refresh "today" on long-open tabs
+bs.onclick=()=>{showStretch=!showStretch;bs.setAttribute('aria-pressed',String(showStretch));saveUi();renderGantt();};
+addEventListener('resize',renderGantt);
+renderAll(); loadProgress();
+setInterval(loadProgress,10*60e3);
 </script>
 </body>
 </html>
