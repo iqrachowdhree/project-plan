@@ -320,7 +320,23 @@ function setStatus(id,s){
   renderAll(); clearTimeout(saveTimer); saveTimer=setTimeout(saveProgress,800);
 }
 
-// ---- Schedule metric (earned schedule, in weeks) ----
+// ---- Schedule status ----
+// Behind: today falls inside a task's planned weeks and it is still "Not started",
+// or a task's planned weeks have all passed and it is not "Completed".
+// In progress or Completed during its planned weeks counts as on schedule.
+// Ahead: a task was completed before its planned start.
+function activeSpanStart(it){ const k=Math.floor(nowFrac); if(!it.weeks.includes(k)) return null; let s=k; while(it.weeks.includes(s-1)) s--; return s; }
+function scheduleStatus(){
+  const behind=[]; let ahead=0;
+  for(const it of counted()){
+    const us=userStatus(it);
+    if(us==='cp'){ const st=Math.min(...it.weeks); if(st>nowFrac) ahead=Math.max(ahead,st-nowFrac); continue; }
+    if(nowFrac>=it.due+1){ behind.push({it,lag:nowFrac-(it.due+1),why:'overdue'}); continue; }
+    const s=activeSpanStart(it); if(s!==null&&us==='ns') behind.push({it,lag:nowFrac-s,why:'not started'});
+  }
+  return {behind,ahead};
+}
+// ---- Planned vs completed work (used for the progress bar) ----
 const counted=()=>ITEMS.filter(i=>!i.stretch);
 function planned(t){ let v=0; for(const it of counted()) for(const k of it.weeks) v+=Math.max(0,Math.min(1,t-k)); return v; }
 function earned(){ let v=0; for(const it of counted()) if(done[it.id]) v+=it.weeks.length; return v; }
@@ -416,10 +432,16 @@ function addBlock(track,grp,t,b,CW){
 function renderStats(){
   const S=document.getElementById('stats'); S.innerHTML='';
   const add=(k,v,d,cls)=>{const s=el('div','stat'+(cls?' '+cls:'')); s.append(el('div','k',k),el('div','v',v)); if(d) s.append(el('div','d',d)); S.append(s); return s;};
-  const sc=schedule(); const wks=Math.abs(sc.sv); const r=x=>x<1?`${Math.round(x*7)} days`:`${x.toFixed(1)} weeks`;
-  let label,cls; if(wks<0.5){label='On schedule';cls='ok';} else if(sc.sv<0){label='Behind by '+r(wks);cls='late';} else {label='Ahead by '+r(wks);cls='ahead';}
-  const late=counted().filter(i=>itemState(i)==='late');
-  const s=add('Schedule status',label,late.length?`${late.length} task${late.length>1?'s':''} overdue`:'Nothing overdue','sched '+cls);
+  const sc=schedule(); const ss=scheduleStatus();
+  const r=x=>{const d=Math.max(1,Math.round(x*7)); return d<7?`${d} day${d>1?'s':''}`:`${(x).toFixed(1)} weeks`;};
+  let label,cls,detail;
+  if(ss.behind.length){
+    label='Behind by '+r(Math.max(...ss.behind.map(b=>b.lag))); cls='late';
+    const o=ss.behind.filter(b=>b.why==='overdue').length, n=ss.behind.length-o;
+    detail=[n?`${n} task${n>1?'s':''} not started`:'',o?`${o} overdue`:''].filter(Boolean).join(' · ');
+  } else if(ss.ahead>=0.5){label='Ahead by '+r(ss.ahead); cls='ahead'; detail='All current tasks on track';}
+  else {label='On schedule'; cls='ok'; detail='All current tasks on track';}
+  const s=add('Schedule status',label,detail,'sched '+cls);
   const b=el('div','bar'); const fill=el('i'); fill.style.width=(sc.ev/sc.total*100)+'%'; const mark=el('b'); mark.style.left=(sc.pvNow/sc.total*100)+'%'; mark.title='Where the plan says you should be today'; b.append(fill,mark); s.append(b);
   const n=counted().length, nd=counted().filter(i=>done[i.id]).length;
   add('Tasks complete',`${nd} / ${n}`,`${Math.round(nd/n*100)}%`);
@@ -469,7 +491,8 @@ function renderChecklist(){
       const tx=el('div','tx'); tx.append(el('div','nm',it.name));
       const meta=(it.dl?`Due week of ${fmt(wk(it.due))}`:rangesText(it.task))+(us==='cp'?` · completed ${fmt(new Date(done[it.id]))}`:'');
       tx.append(el('div','meta',meta));
-      const flag=late?el('span','pill late','Overdue'):el('span');
+      const shouldStart=!late&&us==='ns'&&!it.stretch&&activeSpanStart(it)!==null;
+      const flag=late?el('span','pill late','Overdue'):shouldStart?el('span','pill late','Should have started'):el('span');
       const seg=el('div','seg'); seg.setAttribute('role','group'); seg.setAttribute('aria-label','Status of '+it.name);
       for(const k of ['ns','ip','cp']){const b=el('button',k,LBL[k]); b.type='button'; b.setAttribute('aria-pressed',String(us===k)); b.disabled=!token; b.onclick=()=>setStatus(it.id,k); seg.append(b);}
       li.append(tx,flag,seg); ul.append(li);
