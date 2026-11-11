@@ -111,7 +111,7 @@ h1{font-family:var(--font-display);font-size:1.6rem;margin:0;text-wrap:balance}
 <script>
 const START = new Date(2026,9,19); // Mon 19 Oct 2026
 const N = 34, DAY = 864e5;
-const wk = i => new Date(START.getTime() + i*7*DAY);
+const wk = i => new Date(2026,9,19+7*i);
 const fmt = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
 
 // Background bands (week indices)
@@ -215,7 +215,7 @@ document.addEventListener('pointermove',ev=>{
   const b=ev.target.closest?.('.blk'); if(!b){tip.hidden=true;return;}
   const d=JSON.parse(b.dataset.tip);
   const kind={w:'Work',c:'Contingency',m:'Milestone',d:'Deadline work'}[d.type];
-  const end=new Date(wk(d.e).getTime()+6*DAY);
+  const end=new Date(2026,9,19+7*d.e+6);
   const stx={past:'Complete',now:'In progress',future:'Upcoming'}[d.st];
   const extra=d.tag?(MS[d.tag]||DL[d.tag]):'';
   tip.innerHTML=''; tip.append(el('b',null,d.name));
