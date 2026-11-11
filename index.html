@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sensor Placement Project Plan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: summary strip, then a horizontally scrolling week grid with a sticky task column. */
+:root{
+  --bg:#f7f8fa; --panel:#ffffff; --fg:#1b2230; --muted:#5d6676; --line:#e2e5ec; --line-strong:#c9ced9;
+  --accent:#d1202f;
+  --holiday:#dcdfe5; --exam:#f7c3c9; --cw:#fbe3d0;
+  --g1:#f2a51a; --g2:#f2a51a; --g3:#f2a51a; --g4:#d89ad6; --g5:#7cc576; --g6:#5bb9e3; --g7:#f2d82a; --g8:#e0262f;
+  --font-display:"Space Grotesk",system-ui,sans-serif; --font-body:"Inter",system-ui,sans-serif;
+  --cw-w:30px; --label-w:230px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151b; --panel:#1a1f27; --fg:#e8ebf1; --muted:#9aa3b2; --line:#2a313c; --line-strong:#3a4250;
+  --accent:#ff5a63; --holiday:#2b3039; --exam:#4a2329; --cw:#3d2e22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151b; --panel:#1a1f27; --fg:#e8ebf1; --muted:#9aa3b2; --line:#2a313c; --line-strong:#3a4250;
+  --accent:#ff5a63; --holiday:#2b3039; --exam:#4a2329; --cw:#3d2e22; color-scheme:dark}
+body{margin:0;font-size:14px;background:var(--bg);color:var(--fg);font-family:var(--font-body)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 40px;max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font-family:var(--font-display);font-size:1.6rem;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.stat .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.stat .v{font-family:var(--font-display);font-size:1.25rem;margin-top:4px;font-variant-numeric:tabular-nums}
+.stat .d{font-size:.8rem;color:var(--muted);margin-top:2px}
+.bar{height:6px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.controls button{font:inherit;font-size:.85rem;padding:6px 12px;border-radius:6px;border:1px solid var(--line-strong);background:var(--panel);color:var(--fg);cursor:pointer}
+.controls button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.controls button:focus-visible,.grp:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.scroller{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.gantt{position:relative;display:grid;grid-template-columns:var(--label-w) repeat(34,var(--cw-w));font-size:.8rem;width:max-content}
+.cell{height:26px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);position:relative}
+.lbl{position:sticky;left:0;z-index:3;background:var(--panel);padding:0 10px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid var(--line-strong)}
+.hdr{font-size:.68rem;color:var(--muted);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+.hdr.wk{height:58px;writing-mode:vertical-rl;transform:rotate(180deg);align-items:center;justify-content:flex-start;padding:6px 0;font-variant-numeric:tabular-nums}
+.hdr.mo{font-weight:600;color:var(--fg);font-size:.75rem;justify-content:flex-start;padding-left:4px}
+.grp{font-weight:600;cursor:pointer;user-select:none;gap:6px}
+.grp .chev{display:inline-block;transition:transform .15s;font-size:.7rem;color:var(--muted)}
+.grp.collapsed .chev{transform:rotate(-90deg)}
+.swatch{width:10px;height:10px;border-radius:2px;flex:none}
+.bg-hol{background:var(--holiday)} .bg-exam{background:var(--exam)} .bg-cw{background:var(--cw)}
+.blk{position:absolute;inset:4px 0;z-index:1;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:600;color:#1b2230;cursor:default}
+.blk.cont{background:repeating-linear-gradient(90deg,#1b2230 0 2px,#fff 2px 5px)!important;outline:1px solid #1b2230}
+.blk.ms{background:#fff!important;outline:1.5px solid #1b2230;inset:5px 3px}
+.blk.dl{color:#fff}
+.blk.past{opacity:.55}
+.blk.now{box-shadow:0 0 0 2px var(--fg)}
+.today{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);z-index:4;pointer-events:none}
+.today span{position:absolute;bottom:-1px;left:4px;font-size:.68rem;font-weight:600;color:var(--accent);white-space:nowrap;background:var(--panel);padding:1px 4px;border-radius:3px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .swatch{width:14px;height:14px;border:1px solid var(--line-strong)}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.keys h2{font-family:var(--font-display);font-size:1rem;margin:0 0 8px}
+.keys ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:.85rem}
+.keys li{display:flex;gap:10px;align-items:baseline}
+.keys code{font-family:var(--font-display);font-weight:600;min-width:24px}
+.keys .when{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.keys li.done{color:var(--muted);text-decoration:line-through}
+.pill{font-size:.7rem;padding:1px 7px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted);text-decoration:none!important}
+.tip{position:fixed;z-index:20;pointer-events:none;background:var(--fg);color:var(--bg);padding:8px 10px;border-radius:6px;font-size:.8rem;max-width:260px;line-height:1.4;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.tip b{display:block}
+@media (max-width:600px){:root{--label-w:150px;--cw-w:26px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Sensor Placement Project Plan</h1>
+    <p class="sub">Flow reconstruction with POD and decoders · Oct 2026 – Jun 2027 · the red line tracks today</p>
+  </header>
+
+  <section class="stats" id="stats" aria-label="Progress summary"></section>
+
+  <div class="controls" role="toolbar" aria-label="Chart options">
+    <button id="btnToday" type="button">Scroll to today</button>
+    <button id="btnExpand" type="button">Expand all</button>
+    <button id="btnCollapse" type="button">Collapse all</button>
+    <button id="btnStretch" type="button" aria-pressed="true">Show stretch goal</button>
+  </div>
+
+  <div class="scroller" id="scroller"><div class="gantt" id="gantt"></div></div>
+
+  <div class="legend">
+    <span><i class="swatch bg-hol"></i>Holidays</span>
+    <span><i class="swatch bg-exam"></i>Exams</span>
+    <span><i class="swatch bg-cw"></i>Coursework</span>
+    <span><i class="swatch" style="background:repeating-linear-gradient(90deg,#1b2230 0 2px,#fff 2px 5px)"></i>Contingency</span>
+    <span><i class="swatch" style="background:#fff;border-color:#1b2230"></i>Milestone</span>
+    <span><i class="swatch" style="background:var(--g8)"></i>Deliverable</span>
+  </div>
+
+  <div class="keys">
+    <div><h2>Milestones</h2><ul id="msList"></ul></div>
+    <div><h2>Deliverables</h2><ul id="dlList"></ul></div>
+  </div>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const START = new Date(2026,9,19); // Mon 19 Oct 2026
+const N = 34, DAY = 864e5;
+const wk = i => new Date(START.getTime() + i*7*DAY);
+const fmt = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
+
+// Background bands (week indices)
+const BANDS = {cw:[8,19,20], hol:[9,10,11,23,24,25,26], exam:[27,28,29]};
+
+// [start,end] week indices inclusive. type: w=work, c=contingency, m=milestone, d=deliverable
+const GROUPS = [
+ {id:1,name:'Literature review',c:'--g1',tasks:[
+   {n:'General reading',b:[[0,5],[12,15]]}]},
+ {id:2,name:'Training and skills development',c:'--g2',tasks:[
+   {n:'Python, numpy, pytorch',b:[[3,5]]},
+   {n:'Git, repositories',b:[[4,5]]},
+   {n:'Machine learning',b:[[4,6]]}]},
+ {id:3,name:'Software setup',c:'--g3',tasks:[
+   {n:'Teams data management',b:[[3,3]]},
+   {n:'Python environment and Git repository',b:[[3,4]]},
+   {n:'Imperial HPC cluster',b:[[12,12]]}]},
+ {id:4,name:'Cylinder wake',c:'--g4',tasks:[
+   {n:'Reproduce published POD results',b:[[4,7]]},
+   {n:'Reconstruction error framework',b:[[6,7]]},
+   {n:'Reproduce published decoder results',b:[[7,7],[8,8,'m','S1'],[9,9,'c']]}]},
+ {id:5,name:'Reduced JHTDB',c:'--g5',tasks:[
+   {n:'Survey database, size a reduced subset',b:[[12,12],[13,13,'c']]},
+   {n:'Apply POD',b:[[13,14]]},
+   {n:'Apply decoder',b:[[15,16],[17,17,'c']]},
+   {n:'Errors and comparisons',b:[[16,16],[17,17,'m','S2'],[18,18,'c']]}]},
+ {id:6,name:'Unconstrained sensor placement',c:'--g6',tasks:[
+   {n:'Apply to POD',b:[[17,18]]},
+   {n:'Apply to decoder',b:[[20,21]]},
+   {n:'Errors and comparisons',b:[[21,21,'m','S3'],[22,22,'c']]}]},
+ {id:7,name:'Constrained sensor placement (stretch)',c:'--g7',stretch:true,tasks:[
+   {n:'Restrict sensors to wall',b:[[30,31]]},
+   {n:'Errors and comparisons',b:[[31,31,'m','S4'],[32,32,'c']]}]},
+ {id:8,name:'Deadlines',c:'--g8',tasks:[
+   {n:'Report writing',b:[[1,1,'d','D1'],[2,2,'d','D2'],[12,15,'d'],[21,22,'d'],[30,31,'d'],[32,32,'d','D5']]},
+   {n:'Presentation, seminar, poster',b:[[14,14,'d','D3'],[30,30,'d'],[31,31,'d','D4'],[32,32,'d','D6']]}]},
+];
+const MS = {S1:'Methods verified against published results',S2:'Objectives 1 and 2 complete',S3:'Objective 3 complete',S4:'Objective 4 complete'};
+const DL = {D1:'Project definition',D2:'Project plan',D3:'Progress presentation',D4:'Exhibition poster',D5:'Project report',D6:'Seminar'};
+
+let collapsed = new Set(), showStretch = true;
+try{ const s=JSON.parse(localStorage.getItem('gantt-ui')||'{}'); collapsed=new Set(s.c||[]); if(s.s===false) showStretch=false; }catch(e){}
+const save=()=>{try{localStorage.setItem('gantt-ui',JSON.stringify({c:[...collapsed],s:showStretch}))}catch(e){}};
+
+const now = new Date();
+const nowFrac = (now - START)/(7*DAY); // fractional week index
+const status = (s,e) => nowFrac >= e+1 ? 'past' : nowFrac >= s ? 'now' : 'future';
+
+function el(tag,cls,txt){const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e;}
+const bandClass = i => BANDS.hol.includes(i)?'bg-hol':BANDS.exam.includes(i)?'bg-exam':BANDS.cw.includes(i)?'bg-cw':'';
+
+function render(){
+  const g = document.getElementById('gantt'); g.innerHTML='';
+  // Month row
+  g.appendChild(el('div','cell lbl hdr','Month'));
+  let i=0; while(i<N){ const m=wk(i).getMonth(); let j=i; while(j+1<N && wk(j+1).getMonth()===m) j++;
+    const c=el('div','cell hdr mo',wk(i).toLocaleDateString('en-GB',{month:'short'})); c.style.gridColumn=`span ${j-i+1}`; g.appendChild(c); i=j+1; }
+  // Week row
+  const wl=el('div','cell lbl hdr','Week commencing'); wl.style.height='58px'; wl.style.alignItems='flex-end'; wl.style.justifyContent='flex-start'; g.appendChild(wl);
+  for(let k=0;k<N;k++) g.appendChild(el('div','cell hdr wk '+bandClass(k),wk(k).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})));
+
+  for(const grp of GROUPS){
+    if(grp.stretch && !showStretch) continue;
+    const isC = collapsed.has(grp.id);
+    const h=el('div','cell lbl grp'+(isC?' collapsed':'')); h.tabIndex=0; h.setAttribute('role','button'); h.setAttribute('aria-expanded',String(!isC));
+    h.append(el('span','chev','▼')); const sw=el('i','swatch'); sw.style.background=`var(${grp.c})`; h.append(sw, el('span',null,`${grp.id} · ${grp.name}`));
+    const toggle=()=>{isC?collapsed.delete(grp.id):collapsed.add(grp.id); save(); render();};
+    h.onclick=toggle; h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};
+    g.appendChild(h);
+    // Group summary row cells: show combined span when collapsed
+    const all = grp.tasks.flatMap(t=>t.b.map(b=>[...b,t.n]));
+    for(let k=0;k<N;k++){ const c=el('div','cell '+bandClass(k)); if(isC){ for(const b of all) if(k>=b[0]&&k<=b[1]) addBlock(c,grp,b,b[4],k); } g.appendChild(c); }
+    if(isC) continue;
+    for(const t of grp.tasks){
+      const l=el('div','cell lbl',t.n); l.style.paddingLeft='28px'; l.title=t.n; g.appendChild(l);
+      for(let k=0;k<N;k++){ const c=el('div','cell '+bandClass(k)); for(const b of t.b) if(k>=b[0]&&k<=b[1]) addBlock(c,grp,b,t.n,k); g.appendChild(c); }
+    }
+  }
+  // Today line
+  if(nowFrac>=0 && nowFrac<=N){
+    const line=el('div','today'); const cw=parseFloat(getComputedStyle(g).gridTemplateColumns.split(' ')[1]);
+    const lw=parseFloat(getComputedStyle(g).gridTemplateColumns.split(' ')[0]);
+    line.style.left=(lw+nowFrac*cw)+'px'; line.append(el('span',null,'Today · '+fmt(now))); g.appendChild(line);
+  }
+}
+
+function addBlock(cell,grp,b,name,k){
+  const [s,e,type='w',tag]=b;
+  const d=el('div','blk'+(type==='c'?' cont':type==='m'?' ms':type==='d'?' dl':''));
+  if(type!=='c'&&type!=='m') d.style.background=`var(${type==='d'?'--g8':grp.c})`;
+  const st=status(s,e); if(st==='past') d.classList.add('past'); if(st==='now') d.classList.add('now');
+  if(tag && k===s) d.textContent=tag;
+  if(k===s) d.style.left='2px'; if(k===e) d.style.right='2px';
+  d.dataset.tip=JSON.stringify({name,grp:grp.name,type,tag,s,e,st});
+  cell.appendChild(d);
+}
+
+// Tooltip
+const tip=document.getElementById('tip');
+document.addEventListener('pointermove',ev=>{
+  const b=ev.target.closest?.('.blk'); if(!b){tip.hidden=true;return;}
+  const d=JSON.parse(b.dataset.tip);
+  const kind={w:'Work',c:'Contingency',m:'Milestone',d:'Deadline work'}[d.type];
+  const end=new Date(wk(d.e).getTime()+6*DAY);
+  const stx={past:'Complete',now:'In progress',future:'Upcoming'}[d.st];
+  const extra=d.tag?(MS[d.tag]||DL[d.tag]):'';
+  tip.innerHTML=''; tip.append(el('b',null,d.name));
+  tip.append(el('div',null,`${kind}${d.tag?' · '+d.tag:''}${extra?' – '+extra:''}`));
+  tip.append(el('div',null,`${fmt(wk(d.s))} → ${fmt(end)} · ${stx}`));
+  tip.hidden=false;
+  const x=Math.min(ev.clientX+14, innerWidth-tip.offsetWidth-8), y=Math.min(ev.clientY+14, innerHeight-tip.offsetHeight-8);
+  tip.style.left=x+'px'; tip.style.top=y+'px';
+});
+
+// Summary + key lists
+function weeksUntil(i){return Math.ceil((wk(i)-now)/(7*DAY));}
+function summary(){
+  const pct=Math.max(0,Math.min(100,nowFrac/33*100));
+  const findTag=(prefix)=>{const out=[];for(const g of GROUPS)for(const t of g.tasks)for(const b of t.b)if(b[3]&&b[3].startsWith(prefix))out.push({tag:b[3],i:b[0]});return out.sort((a,b)=>a.i-b.i);};
+  const ms=findTag('S'), dl=findTag('D');
+  const nextMs=ms.find(m=>nowFrac<m.i+1), nextDl=dl.find(m=>nowFrac<m.i+1);
+  const active=[]; for(const g of GROUPS)for(const t of g.tasks)if(g.id!==8&&t.b.some(b=>(b[2]||'w')==='w'&&status(b[0],b[1])==='now'))active.push(t.n);
+  const S=document.getElementById('stats'); S.innerHTML='';
+  const add=(k,v,d,p)=>{const s=el('div','stat');s.append(el('div','k',k),el('div','v',v));if(d)s.append(el('div','d',d));if(p!=null){const b=el('div','bar');const i=el('i');i.style.width=p+'%';b.append(i);s.append(b);}S.append(s);};
+  add('Timeline elapsed',Math.round(pct)+'%',`Week ${Math.max(1,Math.floor(nowFrac)+1)} of 34`,pct);
+  add('Next milestone',nextMs?nextMs.tag:'—',nextMs?`${MS[nextMs.tag]} · ${fmt(wk(nextMs.i))} (${weeksUntil(nextMs.i)} wks)`:'All milestones passed');
+  add('Next deliverable',nextDl?nextDl.tag:'—',nextDl?`${DL[nextDl.tag]} · ${fmt(wk(nextDl.i))} (${weeksUntil(nextDl.i)} wks)`:'All deliverables passed');
+  add('Active this week',String(active.length),active.slice(0,3).join(', ')||'Nothing scheduled');
+  const fill=(id,list,map)=>{const u=document.getElementById(id);u.innerHTML='';for(const m of list){const li=el('li',nowFrac>=m.i+1?'done':'');li.append(el('code',null,m.tag),el('span',null,map[m.tag]));const w=el('span','when',fmt(wk(m.i)));li.append(w);if(m===nextMs||m===nextDl)li.append(el('span','pill','next'));u.append(li);}};
+  fill('msList',ms,MS); fill('dlList',dl,DL);
+}
+
+function scrollToday(){const sc=document.getElementById('scroller');const cw=parseFloat(getComputedStyle(document.getElementById('gantt')).gridTemplateColumns.split(' ')[1]);sc.scrollTo({left:Math.max(0,(nowFrac-3)*cw),behavior:'smooth'});}
+document.getElementById('btnToday').onclick=scrollToday;
+document.getElementById('btnExpand').onclick=()=>{collapsed.clear();save();render();};
+document.getElementById('btnCollapse').onclick=()=>{GROUPS.forEach(g=>collapsed.add(g.id));save();render();};
+const bs=document.getElementById('btnStretch'); bs.setAttribute('aria-pressed',String(showStretch));
+bs.onclick=()=>{showStretch=!showStretch;bs.setAttribute('aria-pressed',String(showStretch));save();render();};
+addEventListener('resize',render);
+render(); summary();
+setInterval(()=>{location.reload();},6*3600e3); // refresh "today" on long-open tabs
+</script>
+</body>
+</html>
